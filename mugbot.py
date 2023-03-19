@@ -25,7 +25,7 @@ if __name__ == '__main__':
         print(f'{username} said: "{user_message}" ({channel}).')
 
         if "mug" in message.content.lower():
-            await message.channel.send("MUG Moment")
+            await message.channel.send("I LOVE MUG!!!")
         if "lean" in message.content.lower().replace(" ", ""):
             await message.delete()
             #   await message.author.timeout(datetime.timedelta(seconds=10))
