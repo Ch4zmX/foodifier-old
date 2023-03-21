@@ -2,7 +2,8 @@ import discord
 import datetime
 
 if __name__ == '__main__':
-
+    BLACKLIST = ['muggestions', 'announcements', 'rules', 'menu', 'ai-art']
+    WHITELIST = ['']
     with open("token.txt", "r") as f:
         TOKEN = f.read().strip()
 
@@ -18,19 +19,21 @@ if __name__ == '__main__':
     @client.event
     async def on_message(message):
         username, user_message, channel = str(message.author), str(message.content), str(message.channel)
+        print(f'{datetime.datetime.now()}: {username} said: "{user_message}" ({channel}).')
+
         if username == str(client.user):
             return
 
-
-        print(f'{username} said: "{user_message}" ({channel}).')
-
-        if "mug" in message.content.lower():
-            await message.channel.send("I LOVE MUG!!!")
+        if channel in BLACKLIST:
+            return
         if "lean" in message.content.lower().replace(" ", ""):
             await message.delete()
             #   await message.author.timeout(datetime.timedelta(seconds=10))
-            if channel != "bot-stuff":
-                await message.channel.send("LEAN BAD")
+            await message.channel.send("I HATE LEAN!!!")
+            return 
+        if "mug" in message.content.lower().replace(" ", ""):
+            await message.channel.send("I LOVE MUG!!!")
+
 
 
     @client.event
@@ -39,8 +42,8 @@ if __name__ == '__main__':
         if "lean" in message.content.lower().replace(" ", ""):
             await message.delete()
 
-            if channel != "bot-stuff":
-                await message.channel.send("LEAN BAD")
+            if channel == "bot-stuff":
+                await message.channel.send("I HATE LEAN!!!")
 
 
     client.run(TOKEN)
