@@ -7,7 +7,8 @@ import urls
 def get_meal_from_time(time):
     pass
 
-def get_site_with_cookie(url, location_cookie):
+def get_site_with_cookie(url, location_url):
+    location_cookie = location_url[0:2]
     cookies = {
         'WebInaCartLocation': location_cookie,
         'WebInaCartDates': '',
@@ -15,6 +16,7 @@ def get_site_with_cookie(url, location_cookie):
         'WebInaCartQtys': '',
         'WebInaCartRecipes': ''
     }
+
     response = requests.get(url, cookies=cookies)
     return response
 
@@ -30,28 +32,36 @@ def get_meal(college, meal="Auto", day="Today"):  # get single meal, defaults to
     if meal == "Auto":
         print("Auto feature not set! Manually choose a meal\nSetting meal to lunch...")
         meal = "Lunch"
-    location = urls.MENU_URLS[college]
+    location_url = urls.LOCATION_URLS[college]
 
-    full_url = urls.BASE_URL+location+urls.MEAL_URL+meal
-    location_cookie = location[0:2]
+    full_url = urls.BASE_URL+location_url+urls.MEAL_URL+meal
 
-
-    response = get_site_with_cookie(full_url, location_cookie) # get html of specified menu
+    print(full_url)
+    # longmenucolmenucat - divider names
+    # longmenucoldispname - menu items name
+    response = get_site_with_cookie(full_url, location_url) # get html of specified menu
     soup = BeautifulSoup(response.content, 'lxml')
-    table = soup.find('div', {'class': 'longmenuinstructs'}).parent.find_all('div')[1].find('table')
-    print(table.prettify())
-    for tag in table.find_all('div', {'class': 'longmenucoldispname'}):
+    table = soup.find('div', {'class': 'longmenuinstructs'}).parent.find_all('div')[1].find('table') #tbody containing trs for each menu item/divider
+    for tr in table.find_all('td'):
+
+        print(tr)
+    #print(table.prettify())
+
+
+
+'''
+for tag in table.find_all('div', {'class': 'longmenucoldispname'}):
         tag = tag.parent.parent # Go up 2 tags to get name and also
         for td in tag.find_all('td'):
             if div := td.find('div', {'class': 'longmenucoldispname'}):
                 food_items[div.text] = []
-                print(div.text, end=': ')
+                #print(div.text, end=': ')
             else:
                 dietary_restriction = td.find('img')['src'][13:].replace('.gif', '')
-                print(dietary_restriction)
+                #print(dietary_restriction)
+'''
 
-
-    print(food_items)
+    #print(food_items)
 
     #for tag in table.find_all('div', {'class': 'longmenucoldispname'}):
         #print(tag, "\n")
