@@ -24,10 +24,12 @@ if __name__ == '__main__':
         if str(message.channel) not in WHITELIST:
             return
         if MESSAGE in str(message.content):
-            meal = await get_meal('cowell/stevenson', 'Lunch')
+            if (meal_dict := await get_meal('cowell/stevenson', 'Lunch')) is None:
+                await message.channel.send('Specified meal is unavailable!\n')
+                return
 
             message_str = ''
-            for food in meal.keys():
+            for food in meal_dict.keys():
                 if food == '-- Cereal --':
                     break
                 #print(food)
@@ -36,7 +38,7 @@ if __name__ == '__main__':
                     message_str += f'**{food.replace("-","").strip()}**\n'
                     continue
                 message_str += food + ' '
-                for diet_restriction in meal[food]:
+                for diet_restriction in meal_dict[food]:
                     #print(diet_restriction)
                     message_str += ' ' + EMOJIS[diet_restriction] + ' ' # add emojis to output string representing dietary restrictions
                 message_str += '\n'

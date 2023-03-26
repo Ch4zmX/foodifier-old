@@ -26,42 +26,50 @@ def get_site_with_cookie(url, location_url):
     #print(soup)
 
 
-def get_meal(college, meal="Auto", day="Today"):  # get single meal, defaults to auto based on current time
+async def get_meal(college, meal="Auto", date='today'):  # get single meal, defaults to auto based on current time. date must be formatted MM/DD/YYYY (any length, just split with slashes)
+    #dtdate=04%2F2%2F2023
     
     food_items = {}
-    div = ''
+    
     if meal == "Auto":
         print("Auto feature not set! Manually choose a meal!\nSetting meal to lunch...")
         meal = "Lunch"
+    
+    date_string = ''
+    if date != 'today':
+        date_split = date.split('/')
+        date_string = f'&dtdate={date_split[0]}%2F{date_split[1]}%2F{date_split[2]}'
+
     location_url = urls.LOCATION_URLS[college]
 
-    full_url = urls.BASE_URL+location_url+urls.MEAL_URL+meal
+    full_url = urls.BASE_URL+location_url+urls.MEAL_URL+meal+date_string
     print(full_url)
-    
     # longmenucolmenucat - divider names
     # longmenucoldispname - menu items name
     with open("menu.htm", "r") as f:
-        response = bytes(f.read(), 'utf-8')  #get_site_with_cookie(full_url, location_url) # get html of specified menu
-
+        response = bytes(f.read(), 'utf-8')  #
+    #response = get_site_with_cookie(full_url, location_url).text # get html of specified menu
     soup = BeautifulSoup(response, 'lxml')
-    table = soup.find('div', {'class': 'longmenuinstructs'}).parent.find_all('div')[1].find('tbody') #tbody containing trs for each menu item/divider
+    print(response)
+    try:
+        if (table := soup.find('div', {'class': 'longmenuinstructs'}).parent.find_all('div')[1].find('tbody')) is None: #tbody containing trs for each menu item/divider
+            return None 
+    except:
+        return None
 
-        
-    for tr in table.find_all('tr',recursive=False):
-        if (divider := tr.find('div',{'class':'longmenucolmenucat'})) is not None:
-            #print(divider.text)
+    for tr in table.find_all('tr',recursive=False): # recursive false so it doesnt get the text 3 times due to nested trs
+        if (divider := tr.find('div',{'class':'longmenucolmenucat'})) is not None: # check if divider (Grill, Cereal etc) in current tr. if so, print or whatever and go to next tr
+            food_items[divider.text] = None
             continue
         if (food := tr.find('div', {'class':'longmenucoldispname'})) is not None:
-            food_items[food.text] = []
-            for img in tr.find_all('img'):
-                diets = img['src'].split('/')[1].split('.')[0]
-                food_items[food.text].append(diets)
+            food_items[food.text] = [] # add food to dictionary 
+            for img in tr.find_all('img'): # iterate through dietary restrictions and get img src names
+                diets = img['src'].split('/')[1].split('.')[0] # parse them just in case i need them later 
                 
-        else:
-            continue
-
-    print(food_items)
+                food_items[food.text].append(diets)
     print(full_url)
+    return food_items
+    
 
 
 '''
@@ -84,4 +92,4 @@ for tag in table.find_all('div', {'class': 'longmenucoldispname'}):
 
 
 if __name__ == '__main__':
-    get_meal('cowell/stevenson', 'Lunch')
+    print(get_meal('cowell/stevenson', 'Dinner', '04/02/23'))
