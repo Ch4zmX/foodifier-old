@@ -23,11 +23,11 @@ if __name__ == '__main__':
     async def on_message(message):
         if str(message.channel) not in WHITELIST:
             return
-        if MESSAGE in str(message.content):
+        if MESSAGE in str(message.content).lower():
             if (meal_dict := await get_meal('cowell/stevenson', 'Lunch')) is None:
                 await message.channel.send('Specified meal is unavailable!\n')
                 return
-
+            
             message_str = ''
             for food in meal_dict.keys():
                 if food == '-- Cereal --':
