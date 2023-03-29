@@ -31,8 +31,11 @@ if __name__ == '__main__':
         command_split = content.split(' ') # command format: "/menu cowell/stevenson Lunch 04/02/23"
         if command_split[0] != '/menu':
             return
-        #print (command_split)
-        if (meal_dict := get_meal(command_split[1], command_split[2], command_split[3])) is None:
+        print (command_split)
+        if (meal_dict := get_meal(command_split[1], command_split[2], command_split[3])) is None or meal_dict == False:
+            if meal_dict == False:
+                await message.channel.send('Error connecting to the menuwebsite! Probably too many requests\n')
+                return
             await message.channel.send('Specified meal is unavailable!\n')
             print("Bot response: meal unavailable")
             return
