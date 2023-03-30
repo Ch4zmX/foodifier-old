@@ -1,28 +1,32 @@
 import discord
+from discord.ext import commands
 import datetime
 from menu import *
 from urls import *
 
+
 if __name__ == '__main__':
     WHITELIST = ['bot-stuff'] # bot will only run if message is in whitelisted channel
-
+    INTENTS = discord.Intents.all()
+    INTENTS.message_content = True
     with open('token.txt', 'r') as f: # if running this yourself, create a bot token and put it in token.txt (purpose is so i can share this program without sharing my token)
         TOKEN = f.read().strip()
-
-    intents = discord.Intents.default()
-    intents.message_content = True
     
-    client = discord.Client(intents=intents)
-
-    @client.event
+    bot = commands.Bot(command_prefix='$', intents=INTENTS)
+    
+    @bot.event
     async def on_ready():
-        print(f'Client has logged in as {client.user}')
+        
+        print(f'Client has logged in as {bot.user}')
+    @bot.command(name='menu', description='Get the menu of a specific meal at the specified dining hall, with an optional day offset.', guild='1028797629037023242')
+    async def menu(interaction: discord.Interaction, question: str):
+        menu_embed = discord.Embed(title='Menu for specified DH:', description='MENU GOES HERE', color='#50C878')
+        await interaction.response.send_message(embed=menu_embed)
 
-    @client.event
+    @bot.event
     async def on_message(message):
-
         username, user_message, channel = str(message.author), str(message.content), str(message.channel)
-        if (channel not in WHITELIST) or message.author == client.user:
+        if (channel not in WHITELIST) or message.author == bot.user:
             return
         print(f'{datetime.datetime.now()}: {username} said {user_message}')
 
@@ -61,4 +65,4 @@ if __name__ == '__main__':
         #print(message_str)
         await message.channel.send(message_str)
         print("Bot response: Successfully got specified meal")
-    client.run(TOKEN)
+    bot.run(TOKEN)
