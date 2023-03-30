@@ -85,7 +85,7 @@ if __name__ == '__main__':
         menu_embed = discord.Embed(title=f'Menu for {meal} at {location} on {date}', description=message_str, color=0x50c878)
 
         await interaction.response.send_message(embed=menu_embed)
-
+'''
     @bot.event
     async def on_message(message):
         username, user_message, channel = str(message.author), str(message.content), str(message.channel)
@@ -99,6 +99,18 @@ if __name__ == '__main__':
         if command_split[0] != '/menu':
             return
 
+        try:
+            meal_dict = get_meal(location, meal, date) # try except in case command 
+        except Exception as e:
+            print(f'Failed fetching menu: {str(e)}')
+            menu_embed = discord.Embed(title=f'Failed fetching specified menu: "{location}"\n', color=0xFF0000)
+            await message.response.send(embed=menu_embed)
+            return
+        if meal_dict is None: # if menu was not found the value will be None
+            print("Bot response: meal unavailable")
+            menu_embed = discord.Embed(title=f'Specified meal is unavailable!\n', color=0xFF0000)
+            await interaction.response.send(embed=menu_embed)
+            return
         
         message_str = ''
         for food in meal_dict.keys():
@@ -119,4 +131,6 @@ if __name__ == '__main__':
         #print(message_str)
         await message.channel.send(message_str)
         print("Bot response: Successfully got specified meal")
-    bot.run(TOKEN)
+        '''
+
+bot.run(TOKEN)
