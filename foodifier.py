@@ -66,9 +66,11 @@ if __name__ == '__main__':
 
             message_str += food + ' '
             if meal_dict[food] is not None:
-                for diet_restriction in meal_dict[food]:
-                    #print(diet_restriction)
-                    message_str += ' ' + EMOJIS[diet_restriction] + ' ' # add emojis to output string representing dietary restrictions
+                try:
+                    for diet_restriction in meal_dict[food]:
+                        message_str += ' ' + EMOJIS[diet_restriction] + ' ' # add emojis to output string representing dietary restrictions
+                except Exception as e:
+                    print(f'Error handling allergen keyword: {str(e)}')
             message_str += '\n'
 
         menu_embed = discord.Embed(title=f'Menu for {meal} at {location} on {date}', description=message_str, color=0x50c878)
