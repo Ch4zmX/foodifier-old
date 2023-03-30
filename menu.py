@@ -45,7 +45,7 @@ def get_meal(college, meal='Auto', date='today'):  # get single meal, defaults t
     # longmenucoldispname - menu items name
     response = get_site_with_cookie(full_url, location_url).text # get html of specified menu
     if 'A RedBack Exception error occured while initializing the RedBack Object' in response:
-        return False
+        raise Exception("Error connecting to the menu website! Probably too many requests!")
 
     #with open("menu.htm", "r") as f:
        # response = bytes(f.read(), 'utf-8')  #
