@@ -35,23 +35,32 @@ if __name__ == '__main__':
         if channel not in WHITELIST:
             print(f'Ignoring command in {channel} channel')
             return
+        if location not in LOCATION_URLS.keys():
+            print(f'Invalid dining location specified: "{location}"')
+            menu_embed = discord.Embed(title=f'Invalid dining location specified: "{location}"\n', color=0xFF0000)
+            await interaction.response.send_message(embed=menu_embed)
+            return
+        if meal not in MEALS:
+            print(f'Invalid meal specified location specified: "{location}". Setting meal to lunch...')
+            #menu_embed = discord.Embed(title=f'Invalid meal specified: "{location}"\n', color=0xFF0000)
+            #await interaction.response.send_message(embed=menu_embed)
+            meal = "Lunch"
         
         print(f'{datetime.now()}: {user} used command') # print who used what command for logging purposes
 
         date = (datetime.now() + timedelta(days=day_offset)).strftime('%m/%d/%y') # get date of , default offset of 0
-
+        
         try:
             meal_dict = get_meal(location, meal, date) # try except in case command 
         except Exception as e:
             print(f'Failed fetching menu: {str(e)}')
-            await interaction.channel.send(f'Failed fetching specified menu: {str(e)}\n') # 
+            menu_embed = discord.Embed(title=f'Failed fetching specified menu: "{location}"\n', color=0xFF0000)
+            await interaction.response.send_message(embed=menu_embed)
             return
-        if meal_dict is None: # False is a special
-            if meal_dict == False:
-                
-                return
-            await interaction.channel.send('Specified meal is unavailable!\n') 
+        if meal_dict is None: # if menu was not found the value will be None
             print("Bot response: meal unavailable")
+            menu_embed = discord.Embed(title=f'Specified meal is unavailable!\n', color=0xFF0000)
+            await interaction.response.send_message(embed=menu_embed)
             return
         
         message_str = ''
@@ -66,7 +75,6 @@ if __name__ == '__main__':
 
             message_str += food + ' '
             if meal_dict[food] is not None:
-                
                     for diet_restriction in meal_dict[food]:
                         try:
                             message_str += ' ' + EMOJIS[diet_restriction] + ' ' # add emojis to output string representing dietary restrictions
