@@ -21,14 +21,12 @@ def get_site_with_cookie(url, location_url):
     return response
 
 
-def get_meal(college, meal='Auto', date='today'):  # get single meal, defaults to auto based on current time. date must be formatted MM/DD/YYYY (any length, just split with slashes)
+def get_meal(college, meal, date='today'):  # get single meal, defaults to auto based on current time. date must be formatted MM/DD/YYYY (any length, just split with slashes)
     #dtdate=04%2F2%2F2023
     
     food_items = {}
     
-    if meal == "Auto":
-        print("Auto feature not set! Manually choose a meal!\nSetting meal to lunch...")
-        meal = "Lunch"
+    
     
     date_string = ''
     #print('date: ', date)
