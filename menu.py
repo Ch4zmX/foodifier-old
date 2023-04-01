@@ -61,9 +61,11 @@ def get_meal(college, meal, date='today'):  # get single meal, defaults to auto 
         #print(f"{tr}\n\n")
         if (divider := tr.find('div',{'class':'longmenucolmenucat'})) is not None: # check if divider (Grill, Cereal etc) in current tr. if so, print or whatever and go to next tr
             food_items[divider.text] = None
+            #print(divider.text)
             continue
         if (food := tr.find('div', {'class':'longmenucoldispname'})) is not None:
             food_items[food.text] = [] # add food to dictionary 
+            #print(food.text)
             for img in tr.find_all('img'): # iterate through dietary restrictions and get img src names
                 diets = img['src'].split('/')[1].split('.')[0] # parse them just in case i need them later 
                 

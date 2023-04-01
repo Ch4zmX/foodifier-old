@@ -54,6 +54,7 @@ if __name__ == '__main__':
         
         try:
             meal_dict = get_meal(location, meal, date) # try except in case command 
+            #print(meal_dict)
         except Exception as e:
             print(f'Failed fetching menu: {str(e)}')
             menu_embed = discord.Embed(title=f'Failed fetching specified menu: "{location}"\n', color=0xFF0000) # error message if exception occured
@@ -68,7 +69,7 @@ if __name__ == '__main__':
         message_str = '' # empty message to add to
         for food in meal_dict.keys(): 
             food = food.strip()
-            if food == '-- Cereal --': # cereal divider means end of actual menu
+            if '-- ' in food and food not in DIVIDERS: # cereal divider means end of actual menu
                 break
             
             if food in DIVIDERS: # ignore dividers and show as bold
