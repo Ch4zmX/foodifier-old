@@ -1,22 +1,30 @@
 from datetime import datetime, timedelta
 from typing import *
-
+import config
 import discord
+
 from discord.ext import commands
 
 from menu import *
 from urls import *
 
+CONFIG_FILE = 'config.ini'
+INTENTS = discord.Intents.all()
+INTENTS.message_content = True
+
+bot = commands.Bot(command_prefix='!', intents=INTENTS)
+
+
+
+
 if __name__ == '__main__':
-    WHITELIST = ['bot-stuff', 'foodifier', 'menu'] # bot will only run if message is in whitelisted channel (these are specific to my test server)
-    INTENTS = discord.Intents.all()
-    INTENTS.message_content = True
-    with open('token.txt', 'r') as f: # if running this yourself, create a bot token and put it in token.txt (purpose is so i can share this program without sharing my token)
-        TOKEN = f.read().strip()
-    
-    bot = commands.Bot(command_prefix='!', intents=INTENTS)
 
-
+    config.reset_config(CONFIG_FILE)
+    config.BLACKLIST = ['general']
+    config.WHITELIST = ['bot-stuff', 'bot-commands']
+    config.write_config(CONFIG_FILE)
+    config.read_config(CONFIG_FILE)
+    print(config.WHITELIST, config.BLACKLIST)
 
     @bot.event
     async def on_ready():
@@ -24,13 +32,51 @@ if __name__ == '__main__':
 
         print(f'Client has logged in as {bot.user}') 
 
+    @bot.tree.command(name='whitelist', description='Set the whitelist to enabled to false, and/or add channels to the whitelist using hashtag links') # first optional arg 'enabled': set whitelist to true or false, second optional arg 'add': enter multiple channels with the hashtag to add to whitelist 
+    async def whitelist(interaction: discord.Interaction,
+                        enabled: Literal['True', 'False'] = None,
+                        add: str = ''
+                        ):
+        if not interaction.user.guild_permissions.administrator:
+            print(f'Non admin user {interaction.user} used whitelist command! Ignoring...')
+            await interaction.response.send_message('You must be server administrator to run this command!')
+            return
+        
+        print(f'User {interaction.user} used whitelist command!')
+
+        if enabled is not None: # None is the default option if not specified, which doesnt change the value of the whitelisted var
+            config.whitelisted = bool(enabled)
+
+        if add != '':
+            msg = f'Successfully added channels '
+            bot.fetch_channel()
+            discord.utils.get
+            channels = str(add).split(' ')
+            for i, channel in enumerate(channels):
+                try:
+                    id = int(channel.strip('<#').strip('>'))
+                    print(id)
+                    channel = await bot.fetch_channel(channel_id=id)
+                    msg += f'"{channel.name}"'
+                    if i < len(channels) - 1:
+                        msg += ', '
+                except:
+                    print('Not a valid channel!')
+            msg += 'to whitelist!'
+        
+        config.write_config(CONFIG_FILE)
+        print(msg)
+        whitelist_embed = discord.Embed(title=msg, color=0x50c878) # error message if meal not available
+        await interaction.response.send_message(embed=whitelist_embed)
+        return  
+
     @bot.tree.command(name='menu', description='Get the menu of a specific meal at the specified dining hall, with an optional day offset.')
     async def menu(interaction: discord.Interaction, 
                    location: Literal[tuple((LOCATION_URLS.keys()))],  # Autocomplete choices for location parameter
                    meal: Literal[tuple(MEALS)],  # Autocomplete choices for meal parameter
                    day_offset: Literal[tuple([i for i in range(0,19)])] = 0): # max offset is tested to be 18 
         user, channel, command = str(interaction.user), str(interaction.channel), str(interaction.command)
-        if channel not in WHITELIST: # only accept commands in whitelisted channels
+        if (config.whitelisted and channel not in config.WHITELIST) or (config.blacklisted and channel in config.BLACKLIST): # only accept commands in whitelisted channels
             print(f'Ignoring command in {channel} channel')
             return
         
@@ -99,7 +145,8 @@ if __name__ == '__main__':
     @bot.event
     async def on_message(message):
         username, user_message, channel = str(message.author), str(message.content), str(message.channel)
-        if username != 'Sh4d0w#8259' or channel != 'mod':
+
+        if channel != 'mod':
             return
         
         print(f'{datetime.now()}: {username} said {user_message}')
@@ -115,4 +162,4 @@ if __name__ == '__main__':
 
         
 
-bot.run(TOKEN)
+bot.run(config.TOKEN)
