@@ -46,9 +46,9 @@ if __name__ == '__main__':
 
         if enabled is not None: # None is the default option if not specified, which doesnt change the value of the whitelisted var
             config.whitelisted = bool(enabled)
-
+        msg = '\n'
         if add != '':
-            msg = f'Successfully added channels '
+            msg += f'Successfully added channels '
             bot.fetch_channel()
             discord.utils.get
             channels = str(add).split(' ')
@@ -66,7 +66,7 @@ if __name__ == '__main__':
         
         config.write_config(CONFIG_FILE)
         print(msg)
-        whitelist_embed = discord.Embed(title=msg, color=0x50c878) # error message if meal not available
+        whitelist_embed = discord.Embed(title='Whitelist', description=msg, color=0x50c878) # error message if meal not available
         await interaction.response.send_message(embed=whitelist_embed)
         return  
 
